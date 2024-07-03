@@ -1,5 +1,7 @@
 /.vscode
-/app.dSYM
+/*.dSYM
 /dependencies
 /app
 /.DS_STORE
+/*.log
+/glad.c
