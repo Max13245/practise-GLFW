@@ -15,6 +15,7 @@ const int window_height = 800;
 const char* title = "Hello World!";
 const string vs_path = "test_vs.glsl";
 const string fs_path = "test_fs.glsl";
+const string fs_path2 = "test_fs2.glsl";
 
 
 string get_shaders(string path) {
@@ -75,11 +76,11 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-    // Define traingle points
+    // Define traingle points, x, y, z
     float points[] = {
     0.0f,  0.5f,  0.0f,
     0.5f, -0.5f,  0.0f,
-    -0.5f, -0.5f,  0.0f
+    -0.5f, -0.5f,  0.0f,
     };
 
     // Store the points in a GLbuffer
@@ -96,6 +97,27 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
+    // Define traingle points, x, y, z
+    float triangle_points[] = {
+    -1.0f,  0.1f,  0.0f,
+    0.6f, -0.4f,  0.0f,
+    -0.4f, -0.4f,  0.0f
+    };
+
+    // Store the points in a GLbuffer
+    GLuint vbo2 = 0;
+    glGenBuffers(1, &vbo2);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), triangle_points, GL_STATIC_DRAW);
+
+    // Create a vertex array object
+    GLuint vao2 = 0;
+    glGenVertexArrays(1, &vao2);
+    glBindVertexArray(vao2);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
     // This is the vertex shader, decides where 3d points should end up on the screen
     string vertex_shader_f = get_shaders(vs_path);
     const char * vertex_shader = vertex_shader_f.c_str();
@@ -103,6 +125,9 @@ int main() {
     // This is the fragment shader, decides the color of one pixels sized fragment (r, g, b, a)
     string fragment_shader_f = get_shaders(fs_path);
     const char * fragment_shader = fragment_shader_f.c_str();
+
+    string fragment_shader_f2 = get_shaders(fs_path2);
+    const char * fragment_shader2 = fragment_shader_f2.c_str();
     
 
     // Load the shaders into GL shaders
@@ -112,12 +137,23 @@ int main() {
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &fragment_shader, NULL);
     glCompileShader(fs);
+    GLuint fs2 = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs2, 1, &fragment_shader2, NULL);
+    glCompileShader(fs2);
 
     // Create an empty program which will serve as the complete shader program (when compiled shaders are added)
     GLuint shader_programme = glCreateProgram();
     glAttachShader(shader_programme, vs);
     glAttachShader(shader_programme, fs);
     glLinkProgram(shader_programme);
+
+    GLuint shader_programme2 = glCreateProgram();
+    glAttachShader(shader_programme2, vs);
+    glAttachShader(shader_programme2, fs2);
+    glLinkProgram(shader_programme2);
+
+    // Set a background color
+    glClearColor(0.8f, 0.8f, 1.0f, 1);
 
     // game loop
     while(!glfwWindowShouldClose(window)) {
@@ -126,8 +162,11 @@ int main() {
 
         glUseProgram(shader_programme);
         glBindVertexArray(vao);
-
         // draw points 0-3 from the currently bound VAO with current in-use shader
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glUseProgram(shader_programme2);
+        glBindVertexArray(vao2);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // update other events like input handling 
