@@ -121,6 +121,24 @@ void glfw_window_size_callback(GLFWwindow* window, int width, int height) {
     window_height = height;
 }
 
+void _update_fps_counter(GLFWwindow* window) {
+    static double previous_seconds = glfwGetTime();
+    static int frame_count;
+    double current_seconds = glfwGetTime();
+    double elapsed_seconds = current_seconds - previous_seconds;
+    if (elapsed_seconds > 0.25) {
+        previous_seconds = current_seconds;
+        double fps = (double)frame_count / elapsed_seconds;
+        char tmp[128];
+        sprintf(tmp, "opengl @ fps: %.2f", fps);
+
+        // For now use the window title to display the frame rate
+        glfwSetWindowTitle(window, tmp);
+        frame_count = 0;
+    }
+    frame_count++;
+}
+
 int main() {
     assert(restart_gl_log());
     gl_log("starting GLFW\n%s\n", glfwGetVersionString());
@@ -254,10 +272,12 @@ int main() {
 
     // game loop
     while(!glfwWindowShouldClose(window)) {
+        _update_fps_counter(window);
         // wipe the drawing surface clear
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // MACDIFF? When i update the viewport on mac everything breaks (traingles are weirdly positioned on window)
+        // Some things not updated during dragging
         //glViewport(0, 0, window_width, window_height);
 
         glUseProgram(shader_programme);
@@ -269,11 +289,11 @@ int main() {
         glBindVertexArray(vao2);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        // update other events like input handling 
-        glfwPollEvents();
-
         // put the stuff we've been drawing onto the display
         glfwSwapBuffers(window);
+
+        // update other events like input handling 
+        glfwPollEvents();
 
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)){
             glfwSetWindowShouldClose(window, 1);
