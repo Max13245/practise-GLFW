@@ -30,7 +30,131 @@ string get_shaders(string path) {
     return buffer.str();
 }
 
-/* Some copy pasted logging code */
+/* Some (a lot of) copy pasted logging code, but luckily not that complicated  */
+void _print_shader_info_log(GLuint shader_index) {
+    int max_length = 2048;
+    int actual_length = 0;
+    char shader_log[2048];
+    glGetShaderInfoLog(shader_index, max_length, &actual_length, shader_log);
+    printf("shader info log for GL index %u:\n%s\n", shader_index, shader_log);
+}
+
+void _print_programme_info_log(GLuint programme) {
+    int max_length = 2048;
+    int actual_length = 0;
+    char program_log[2048];
+    glGetProgramInfoLog(programme, max_length, &actual_length, program_log);
+    printf("program info log for GL index %u:\n%s", programme, program_log);
+}
+
+const char* GL_type_to_string(GLenum type) {
+    switch(type) {
+        case GL_BOOL: return "bool";
+        case GL_INT: return "int";
+        case GL_FLOAT: return "float";
+        case GL_FLOAT_VEC2: return "vec2";
+        case GL_FLOAT_VEC3: return "vec3";
+        case GL_FLOAT_VEC4: return "vec4";
+        case GL_FLOAT_MAT2: return "mat2";
+        case GL_FLOAT_MAT3: return "mat3";
+        case GL_FLOAT_MAT4: return "mat4";
+        case GL_SAMPLER_2D: return "sampler2D";
+        case GL_SAMPLER_3D: return "sampler3D";
+        case GL_SAMPLER_CUBE: return "samplerCube";
+        case GL_SAMPLER_2D_SHADOW: return "sampler2DShadow";
+        default: break;
+    }
+    return "other";
+}
+
+void print_all(GLuint programme) {
+    printf("--------------------\nshader programme %i info:\n", programme);
+    int params = -1;
+    glGetProgramiv(programme, GL_LINK_STATUS, &params);
+    printf("GL_LINK_STATUS = %i\n", params);
+    
+    glGetProgramiv(programme, GL_ATTACHED_SHADERS, &params);
+    printf("GL_ATTACHED_SHADERS = %i\n", params);
+    
+    glGetProgramiv(programme, GL_ACTIVE_ATTRIBUTES, &params);
+    printf("GL_ACTIVE_ATTRIBUTES = %i\n", params);
+    for (int i = 0; i < params; i++) {
+        char name[64];
+        int max_length = 64;
+        int actual_length = 0;
+        int size = 0;
+        GLenum type;
+        glGetActiveAttrib (
+        programme,
+        i,
+        max_length,
+        &actual_length,
+        &size,
+        &type,
+        name
+        );
+        if (size > 1) {
+        for(int j = 0; j < size; j++) {
+            char long_name[64];
+            sprintf(long_name, "%s[%i]", name, j);
+            int location = glGetAttribLocation(programme, long_name);
+            printf("  %i) type:%s name:%s location:%i\n",
+            i, GL_type_to_string(type), long_name, location);
+        }
+        } else {
+        int location = glGetAttribLocation(programme, name);
+        printf("  %i) type:%s name:%s location:%i\n",
+            i, GL_type_to_string(type), name, location);
+        }
+    }
+    
+    glGetProgramiv(programme, GL_ACTIVE_UNIFORMS, &params);
+    printf("GL_ACTIVE_UNIFORMS = %i\n", params);
+    for(int i = 0; i < params; i++) {
+        char name[64];
+        int max_length = 64;
+        int actual_length = 0;
+        int size = 0;
+        GLenum type;
+        glGetActiveUniform(
+        programme,
+        i,
+        max_length,
+        &actual_length,
+        &size,
+        &type,
+        name
+        );
+        if(size > 1) {
+        for(int j = 0; j < size; j++) {
+            char long_name[64];
+            sprintf(long_name, "%s[%i]", name, j);
+            int location = glGetUniformLocation(programme, long_name);
+            printf("  %i) type:%s name:%s location:%i\n",
+            i, GL_type_to_string(type), long_name, location);
+        }
+        } else {
+        int location = glGetUniformLocation(programme, name);
+        printf("  %i) type:%s name:%s location:%i\n",
+            i, GL_type_to_string(type), name, location);
+        }
+    }
+    
+    _print_programme_info_log(programme);
+}
+
+bool is_valid(GLuint programme) {
+    glValidateProgram(programme);
+    int params = -1;
+    glGetProgramiv(programme, GL_VALIDATE_STATUS, &params);
+    printf("program %i GL_VALIDATE_STATUS = %i\n", programme, params);
+    if (GL_TRUE != params) {
+        _print_programme_info_log(programme);
+        return false;
+    }
+    return true;
+}
+
 bool restart_gl_log() {
     FILE* file = fopen(GL_LOG_FILE, "w");
     if(!file) {
@@ -198,40 +322,35 @@ int main() {
     -0.5f, -0.5f,  0.0f,
     };
 
+    // Define colors RGB
+    float colors[] = {
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+    };
+
     // Store the points in a GLbuffer
-    GLuint vbo = 0;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    GLuint points_vbo = 0;
+    glGenBuffers(1, &points_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
     glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), points, GL_STATIC_DRAW);
+
+    GLuint color_vbo = 0;
+    glGenBuffers(1, &color_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
+    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), colors, GL_STATIC_DRAW);
 
     // Create a vertex array object
     GLuint vao = 0;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-    // Define traingle points, x, y, z
-    float triangle_points[] = {
-    -1.0f,  0.1f,  0.0f,
-    0.6f, -0.4f,  0.0f,
-    -0.4f, -0.4f,  0.0f
-    };
-
-    // Store the points in a GLbuffer
-    GLuint vbo2 = 0;
-    glGenBuffers(1, &vbo2);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), triangle_points, GL_STATIC_DRAW);
-
-    // Create a vertex array object
-    GLuint vao2 = 0;
-    glGenVertexArrays(1, &vao2);
-    glBindVertexArray(vao2);
     glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(1);
 
     // This is the vertex shader, decides where 3d points should end up on the screen
     string vertex_shader_f = get_shaders(vs_path);
@@ -240,32 +359,40 @@ int main() {
     // This is the fragment shader, decides the color of one pixels sized fragment (r, g, b, a)
     string fragment_shader_f = get_shaders(fs_path);
     const char * fragment_shader = fragment_shader_f.c_str();
-
-    string fragment_shader_f2 = get_shaders(fs_path2);
-    const char * fragment_shader2 = fragment_shader_f2.c_str();
     
 
     // Load the shaders into GL shaders
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertex_shader, NULL);
     glCompileShader(vs);
+    // check for compile errors
+    int compile_params = -1;
+    glGetShaderiv(vs, GL_COMPILE_STATUS, &compile_params);
+    if (GL_TRUE != compile_params) {
+        fprintf(stderr, "ERROR: GL shader index %i did not compile\n", vs);
+        _print_shader_info_log(vs);
+        exit(1);
+    }
+
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &fragment_shader, NULL);
     glCompileShader(fs);
-    GLuint fs2 = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs2, 1, &fragment_shader2, NULL);
-    glCompileShader(fs2);
 
     // Create an empty program which will serve as the complete shader program (when compiled shaders are added)
     GLuint shader_programme = glCreateProgram();
     glAttachShader(shader_programme, vs);
     glAttachShader(shader_programme, fs);
     glLinkProgram(shader_programme);
-
-    GLuint shader_programme2 = glCreateProgram();
-    glAttachShader(shader_programme2, vs);
-    glAttachShader(shader_programme2, fs2);
-    glLinkProgram(shader_programme2);
+    // check if link was successful
+    int link_params = -1;
+    glGetProgramiv(shader_programme, GL_LINK_STATUS, &link_params);
+    if (GL_TRUE != link_params) {
+        fprintf(stderr,
+            "ERROR: could not link shader programme GL index %u\n",
+            shader_programme);
+        _print_programme_info_log(shader_programme);
+        exit(1);
+    }
 
     // Set a background color
     glClearColor(0.8f, 0.8f, 1.0f, 1);
@@ -283,10 +410,6 @@ int main() {
         glUseProgram(shader_programme);
         glBindVertexArray(vao);
         // draw points 0-3 from the currently bound VAO with current in-use shader
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        glUseProgram(shader_programme2);
-        glBindVertexArray(vao2);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // put the stuff we've been drawing onto the display
