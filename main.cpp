@@ -6,6 +6,7 @@
 
 #include "utils/log.hpp"
 #include "utils/shaders.hpp"
+#include "triangle.hpp"
 
 #include <stdio.h>
 #include <iostream>
@@ -20,8 +21,6 @@ int window_width = 800;
 int window_height = 800;
 
 const char* title = "Hello World!";
-const char* vs_path = "test_vs.glsl";
-const char* fs_path = "test_fs.glsl";
 
 void glfw_error_callback(int error, const char* description) {
   gl_log("GLFW ERROR: code %i msg: %s\n", error, description);
@@ -116,30 +115,7 @@ int main() {
         0.0f, 0.8f, 1.0f,
     };
 
-    // Store the points in a GLbuffer
-    GLuint points_vbo = 0;
-    glGenBuffers(1, &points_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), points, GL_STATIC_DRAW);
-
-    GLuint color_vbo = 0;
-    glGenBuffers(1, &color_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
-    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), colors, GL_STATIC_DRAW);
-
-    // Create a vertex array object
-    GLuint vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-
-    GLuint shader_programme = create_shaders_from_files(vs_path, fs_path);
+    TRIANGLE random_triangle(points, colors);
 
     // Set a background color
     glClearColor(0.8f, 0.8f, 1.0f, 1);
@@ -158,11 +134,11 @@ int main() {
         transform = glm::translate(transform, glm::vec3(xOffset, yOffset, 0.0f));
 
         // Retrieve the matrix uniform location and set the matrix
-        unsigned int transformLoc = glGetUniformLocation(shader_programme, "transform");
+        unsigned int transformLoc = glGetUniformLocation(random_triangle.get_shader_programme(), "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
-        glUseProgram(shader_programme);
-        glBindVertexArray(vao);
+        glUseProgram(random_triangle.get_shader_programme());
+        glBindVertexArray(random_triangle.get_vao());
         // Draw points 0-3 from the currently bound VAO with current in-use shader
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -179,9 +155,10 @@ int main() {
         }
     }
 
-    glDeleteBuffers(1, &color_vbo);
-    glDeleteBuffers(1, &points_vbo);
-    glDeleteBuffers(1, &vao);
+    // TODO: inside of triangle object
+    //glDeleteBuffers(1, &color_vbo);
+    //glDeleteBuffers(1, &points_vbo);
+    //glDeleteBuffers(1, &vao);
 
     // Destory/Terminate GLFW components
     glfwDestroyWindow(window);
