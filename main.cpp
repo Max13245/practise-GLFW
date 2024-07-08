@@ -18,17 +18,8 @@ int window_width = 800;
 int window_height = 800;
 
 const char* title = "Hello World!";
-const string vs_path = "test_vs.glsl";
-const string fs_path = "test_fs.glsl";
-const string fs_path2 = "test_fs2.glsl";
-
-
-string get_shaders(string path) {
-    std::ifstream t(path);
-    std::stringstream buffer;
-    buffer << t.rdbuf();
-    return buffer.str();
-}
+const char* vs_path = "test_vs.glsl";
+const char* fs_path = "test_fs.glsl";
 
 /* Some (a lot of) copy pasted logging code, but luckily not that complicated  */
 void _print_shader_info_log(GLuint shader_index) {
@@ -236,6 +227,79 @@ void log_gl_params() {
     gl_log("-----------------------------\n");
 }
 
+GLuint create_compiled_shader(string shader_str, int SHADER_TYPE) {
+    // Convert string to const char *
+    const char * shader_char = shader_str.c_str();
+
+    // Load the shaders into GL shaders
+    GLuint shader = glCreateShader(SHADER_TYPE);
+    glShaderSource(shader, 1, &shader_char, NULL);
+    glCompileShader(shader);
+
+    // Check for compile errors
+    int compile_params = -1;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compile_params);
+    if (GL_TRUE != compile_params) {
+        fprintf(stderr, "ERROR: GL shader index %i did not compile\n", shader);
+        _print_shader_info_log(shader);
+        exit(1);
+    }
+
+    return shader;
+}
+
+GLuint create_shader_program_from_strings(string vs_string, string fs_string){
+    GLuint vs = create_compiled_shader(vs_string, GL_VERTEX_SHADER);
+    GLuint fs = create_compiled_shader(fs_string, GL_FRAGMENT_SHADER);
+
+    // Create an empty program which will serve as the complete shader program (when compiled shaders are added)
+    GLuint shader_programme = glCreateProgram();
+    glAttachShader(shader_programme, vs);
+    glAttachShader(shader_programme, fs);
+    glLinkProgram(shader_programme);
+
+    // check if link was successful
+    int link_params = -1;
+    glGetProgramiv(shader_programme, GL_LINK_STATUS, &link_params);
+    if (GL_TRUE != link_params) {
+        fprintf(stderr,
+            "ERROR: could not link shader programme GL index %u\n",
+            shader_programme);
+        _print_programme_info_log(shader_programme);
+        exit(1);
+    }
+
+    return shader_programme;
+}
+
+string get_shaders(const char* path) {
+    std::ifstream t(path);
+    std::stringstream buffer;
+    buffer << t.rdbuf();
+    return buffer.str();
+}
+
+GLuint create_shaders_from_files(
+    const char* vertex_shader_filename, 
+    const char* fragment_shader_filename) {
+        string vs_string = get_shaders(vertex_shader_filename);
+        string fs_string = get_shaders(fragment_shader_filename);
+        return create_shader_program_from_strings(vs_string, fs_string);
+}
+
+void reload_shader_from_files(GLuint *program, 
+    const char* vertex_shader_filename, 
+    const char* fragment_shader_filename){
+        assert( program && vertex_shader_filename && fragment_shader_filename );
+
+        GLuint reloaded_program = create_shaders_from_files(vertex_shader_filename, fragment_shader_filename);
+
+        if (reloaded_program) {
+            glDeleteProgram(*program);
+            *program = reloaded_program;
+        }
+}
+
 void glfw_error_callback(int error, const char* description) {
   gl_log("GLFW ERROR: code %i msg: %s\n", error, description);
 }
@@ -324,9 +388,9 @@ int main() {
 
     // Define colors RGB
     float colors[] = {
-        1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f,
+        0.0f, 0.5f, 1.0f,
+        0.3f, 0.5f, 1.0f,
+        0.0f, 0.8f, 1.0f,
     };
 
     // Store the points in a GLbuffer
@@ -352,47 +416,7 @@ int main() {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    // This is the vertex shader, decides where 3d points should end up on the screen
-    string vertex_shader_f = get_shaders(vs_path);
-    const char * vertex_shader = vertex_shader_f.c_str();
-
-    // This is the fragment shader, decides the color of one pixels sized fragment (r, g, b, a)
-    string fragment_shader_f = get_shaders(fs_path);
-    const char * fragment_shader = fragment_shader_f.c_str();
-    
-
-    // Load the shaders into GL shaders
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vertex_shader, NULL);
-    glCompileShader(vs);
-    // check for compile errors
-    int compile_params = -1;
-    glGetShaderiv(vs, GL_COMPILE_STATUS, &compile_params);
-    if (GL_TRUE != compile_params) {
-        fprintf(stderr, "ERROR: GL shader index %i did not compile\n", vs);
-        _print_shader_info_log(vs);
-        exit(1);
-    }
-
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &fragment_shader, NULL);
-    glCompileShader(fs);
-
-    // Create an empty program which will serve as the complete shader program (when compiled shaders are added)
-    GLuint shader_programme = glCreateProgram();
-    glAttachShader(shader_programme, vs);
-    glAttachShader(shader_programme, fs);
-    glLinkProgram(shader_programme);
-    // check if link was successful
-    int link_params = -1;
-    glGetProgramiv(shader_programme, GL_LINK_STATUS, &link_params);
-    if (GL_TRUE != link_params) {
-        fprintf(stderr,
-            "ERROR: could not link shader programme GL index %u\n",
-            shader_programme);
-        _print_programme_info_log(shader_programme);
-        exit(1);
-    }
+    GLuint shader_programme = create_shaders_from_files(vs_path, fs_path);
 
     // Set a background color
     glClearColor(0.8f, 0.8f, 1.0f, 1);
