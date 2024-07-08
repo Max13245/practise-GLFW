@@ -33,6 +33,10 @@ TRIANGLE::TRIANGLE(float vertices[9], float colors[9]) {
     glEnableVertexAttribArray(1);
 
     shader_programme = create_shaders_from_files("test_vs.glsl", "test_fs.glsl");
+
+    xOffset = 0.0f;
+    yOffset = 0.0f;
+    this->update_transform_matrix();
 };
 
 GLuint TRIANGLE::get_vao() {
@@ -41,4 +45,36 @@ GLuint TRIANGLE::get_vao() {
 
 GLuint TRIANGLE::get_shader_programme() {
     return this->shader_programme;
+}
+
+void TRIANGLE::draw() {
+    // Retrieve the matrix uniform location and set the matrix
+    unsigned int transformLoc = glGetUniformLocation(this->shader_programme, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(this->transform));
+}
+
+void TRIANGLE::move_up(float delta_offset) {
+    this->yOffset += delta_offset;
+    this->update_transform_matrix();
+}
+
+void TRIANGLE::move_right(float delta_offset) {
+    this->xOffset += delta_offset;
+    this->update_transform_matrix();
+}
+
+void TRIANGLE::move_down(float delta_offset) {
+    this->yOffset -= delta_offset;
+    this->update_transform_matrix();
+}
+
+void TRIANGLE::move_left(float delta_offset) {
+    this->xOffset -= delta_offset;
+    this->update_transform_matrix();
+}
+
+void TRIANGLE::update_transform_matrix() {
+    // Update the transformation matrix
+    transform = glm::mat4(1.0f);
+    transform = glm::translate(transform, glm::vec3(xOffset, yOffset, 0.0f));
 }

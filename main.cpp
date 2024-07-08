@@ -116,26 +116,18 @@ int main() {
     };
 
     TRIANGLE random_triangle(points, colors);
+    float speed = 0.005f;
 
     // Set a background color
     glClearColor(0.8f, 0.8f, 1.0f, 1);
-
-    float xOffset = 0.0f;
-    float yOffset = 0.0f;
 
     // game loop
     while(!glfwWindowShouldClose(window)) {
         _update_fps_counter(window);
         // Clear screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Update the transformation matrix
-        glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, glm::vec3(xOffset, yOffset, 0.0f));
-
-        // Retrieve the matrix uniform location and set the matrix
-        unsigned int transformLoc = glGetUniformLocation(random_triangle.get_shader_programme(), "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+    
+        random_triangle.draw();
 
         glUseProgram(random_triangle.get_shader_programme());
         glBindVertexArray(random_triangle.get_vao());
@@ -150,8 +142,18 @@ int main() {
 
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)){
             glfwSetWindowShouldClose(window, 1);
-        } else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT)) {
-            xOffset += 0.001f;
+        } 
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_UP)) {
+            random_triangle.move_up(speed);
+        } 
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT)) {
+            random_triangle.move_right(speed);
+        } 
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN)) {
+            random_triangle.move_down(speed);
+        } 
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT)) {
+            random_triangle.move_left(speed);
         }
     }
 
