@@ -9,13 +9,13 @@
 
 TRIANGLE::TRIANGLE(float vertices[9], float colors[9]) {
     // Store the points in a GLbuffer
-    GLuint points_vbo = 0;
+    points_vbo = 0;
     glGenBuffers(1, &points_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
     glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), vertices, GL_STATIC_DRAW);
 
     // Store the color in a buffer aswell
-    GLuint color_vbo = 0;
+    color_vbo = 0;
     glGenBuffers(1, &color_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
     glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), colors, GL_STATIC_DRAW);
@@ -40,41 +40,47 @@ TRIANGLE::TRIANGLE(float vertices[9], float colors[9]) {
 };
 
 GLuint TRIANGLE::get_vao() {
-    return this->vao;
+    return vao;
 }
 
 GLuint TRIANGLE::get_shader_programme() {
-    return this->shader_programme;
+    return shader_programme;
 }
 
 void TRIANGLE::draw() {
     // Retrieve the matrix uniform location and set the matrix
-    unsigned int transformLoc = glGetUniformLocation(this->shader_programme, "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(this->transform));
+    unsigned int transformLoc = glGetUniformLocation(shader_programme, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 }
 
 void TRIANGLE::move_up(float delta_offset) {
-    this->yOffset += delta_offset;
-    this->update_transform_matrix();
+    yOffset += delta_offset;
+    update_transform_matrix();
 }
 
 void TRIANGLE::move_right(float delta_offset) {
-    this->xOffset += delta_offset;
-    this->update_transform_matrix();
+    xOffset += delta_offset;
+    update_transform_matrix();
 }
 
 void TRIANGLE::move_down(float delta_offset) {
-    this->yOffset -= delta_offset;
-    this->update_transform_matrix();
+    yOffset -= delta_offset;
+    update_transform_matrix();
 }
 
 void TRIANGLE::move_left(float delta_offset) {
-    this->xOffset -= delta_offset;
-    this->update_transform_matrix();
+    xOffset -= delta_offset;
+    update_transform_matrix();
 }
 
 void TRIANGLE::update_transform_matrix() {
     // Update the transformation matrix
     transform = glm::mat4(1.0f);
     transform = glm::translate(transform, glm::vec3(xOffset, yOffset, 0.0f));
+}
+
+void TRIANGLE::delete_buffers() {
+    glDeleteBuffers(1, &color_vbo);
+    glDeleteBuffers(1, &points_vbo);
+    glDeleteBuffers(1, &vao);
 }

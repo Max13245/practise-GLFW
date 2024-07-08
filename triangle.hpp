@@ -15,8 +15,11 @@ class TRIANGLE {
         void move_right(float delta_offset);
         void move_down(float delta_offset);
         void move_left(float delta_offset);
+        void delete_buffers();
 
     private:
+        GLuint points_vbo;
+        GLuint color_vbo;
         GLuint vao;
         GLuint shader_programme;
         float xOffset;

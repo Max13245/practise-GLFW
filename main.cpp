@@ -157,10 +157,7 @@ int main() {
         }
     }
 
-    // TODO: inside of triangle object
-    //glDeleteBuffers(1, &color_vbo);
-    //glDeleteBuffers(1, &points_vbo);
-    //glDeleteBuffers(1, &vao);
+    random_triangle.delete_buffers();
 
     // Destory/Terminate GLFW components
     glfwDestroyWindow(window);
