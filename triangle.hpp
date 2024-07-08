@@ -16,12 +16,14 @@ class TRIANGLE {
         void move_down(float delta_offset);
         void move_left(float delta_offset);
         void delete_buffers();
+        double get_delta_time();
 
     private:
         GLuint points_vbo;
         GLuint color_vbo;
         GLuint vao;
         GLuint shader_programme;
+        double previous_time; // previous_time is updated on every draw event(each itteration)
         float xOffset;
         float yOffset;
         glm::mat4 transform;

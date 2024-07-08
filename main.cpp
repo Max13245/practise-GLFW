@@ -16,6 +16,9 @@
 #include <assert.h>
 using namespace std;
 
+#include <unistd.h>
+
+
 // Constants
 int window_width = 800;
 int window_height = 800;
@@ -116,7 +119,7 @@ int main() {
     };
 
     TRIANGLE random_triangle(points, colors);
-    float speed = 0.005f;
+    float speed = 0.4f; // Speed in f/s (distance / time)
 
     // Set a background color
     glClearColor(0.8f, 0.8f, 1.0f, 1);
@@ -126,8 +129,6 @@ int main() {
         _update_fps_counter(window);
         // Clear screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-        random_triangle.draw();
 
         glUseProgram(random_triangle.get_shader_programme());
         glBindVertexArray(random_triangle.get_vao());
@@ -155,6 +156,8 @@ int main() {
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT)) {
             random_triangle.move_left(speed);
         }
+
+        random_triangle.draw();
     }
 
     random_triangle.delete_buffers();

@@ -7,6 +7,10 @@
 #include "utils/shaders.hpp"
 #include "triangle.hpp"
 
+#include <stdio.h>
+#include <iostream>
+using namespace std;
+
 TRIANGLE::TRIANGLE(float vertices[9], float colors[9]) {
     // Store the points in a GLbuffer
     points_vbo = 0;
@@ -48,28 +52,32 @@ GLuint TRIANGLE::get_shader_programme() {
 }
 
 void TRIANGLE::draw() {
+    // ALWAYS draw after moving, since then the transform matrix is updated and previous time is not yet updated
     // Retrieve the matrix uniform location and set the matrix
     unsigned int transformLoc = glGetUniformLocation(shader_programme, "transform");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+    // Update previous time so delta time can be calculated if necessary
+    previous_time = glfwGetTime();
 }
 
 void TRIANGLE::move_up(float delta_offset) {
-    yOffset += delta_offset;
+    yOffset += delta_offset * get_delta_time();
     update_transform_matrix();
 }
 
 void TRIANGLE::move_right(float delta_offset) {
-    xOffset += delta_offset;
+    xOffset += delta_offset * get_delta_time();
     update_transform_matrix();
 }
 
 void TRIANGLE::move_down(float delta_offset) {
-    yOffset -= delta_offset;
+    yOffset -= delta_offset * get_delta_time();
     update_transform_matrix();
 }
 
 void TRIANGLE::move_left(float delta_offset) {
-    xOffset -= delta_offset;
+    xOffset -= delta_offset * get_delta_time();
     update_transform_matrix();
 }
 
@@ -83,4 +91,9 @@ void TRIANGLE::delete_buffers() {
     glDeleteBuffers(1, &color_vbo);
     glDeleteBuffers(1, &points_vbo);
     glDeleteBuffers(1, &vao);
+}
+
+double TRIANGLE::get_delta_time() {
+    cout << glfwGetTime() - previous_time << endl;
+    return glfwGetTime() - previous_time;
 }
