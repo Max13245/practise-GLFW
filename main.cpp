@@ -16,6 +16,7 @@
 #include <assert.h>
 using namespace std;
 
+// For fps control
 #include <unistd.h>
 
 
@@ -119,21 +120,27 @@ int main() {
     };
 
     TRIANGLE random_triangle(points, colors);
-    float speed = 0.4f; // Speed in f/s (distance / time)
+    float speed = 1.0f; // Speed in f/s (distance / time)
 
     // Set a background color
     glClearColor(0.8f, 0.8f, 1.0f, 1);
 
+    double previous_time = glfwGetTime();
+
     // game loop
     while(!glfwWindowShouldClose(window)) {
+        // Calculate delta time before handling input events
+        double delta_time = glfwGetTime() - previous_time;
+        random_triangle.set_delta_time(delta_time);
+        previous_time = glfwGetTime();
+
+        // Update fps
         _update_fps_counter(window);
+
         // Clear screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glUseProgram(random_triangle.get_shader_programme());
-        glBindVertexArray(random_triangle.get_vao());
-        // Draw points 0-3 from the currently bound VAO with current in-use shader
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        
+        random_triangle.draw();
 
         // Put the stuff we've been drawing onto the display
         glfwSwapBuffers(window);
@@ -156,8 +163,6 @@ int main() {
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT)) {
             random_triangle.move_left(speed);
         }
-
-        random_triangle.draw();
     }
 
     random_triangle.delete_buffers();

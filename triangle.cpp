@@ -52,32 +52,32 @@ GLuint TRIANGLE::get_shader_programme() {
 }
 
 void TRIANGLE::draw() {
-    // ALWAYS draw after moving, since then the transform matrix is updated and previous time is not yet updated
+    glUseProgram(shader_programme);
+    glBindVertexArray(vao);
+    // Draw points 0-3 from the currently bound VAO with current in-use shader
+    glDrawArrays(GL_TRIANGLES, 0, 3);
     // Retrieve the matrix uniform location and set the matrix
     unsigned int transformLoc = glGetUniformLocation(shader_programme, "transform");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-    // Update previous time so delta time can be calculated if necessary
-    previous_time = glfwGetTime();
 }
 
 void TRIANGLE::move_up(float delta_offset) {
-    yOffset += delta_offset * get_delta_time();
+    yOffset += delta_offset * delta_time;
     update_transform_matrix();
 }
 
 void TRIANGLE::move_right(float delta_offset) {
-    xOffset += delta_offset * get_delta_time();
+    xOffset += delta_offset * delta_time;
     update_transform_matrix();
 }
 
 void TRIANGLE::move_down(float delta_offset) {
-    yOffset -= delta_offset * get_delta_time();
+    yOffset -= delta_offset * delta_time;
     update_transform_matrix();
 }
 
 void TRIANGLE::move_left(float delta_offset) {
-    xOffset -= delta_offset * get_delta_time();
+    xOffset -= delta_offset * delta_time;
     update_transform_matrix();
 }
 
@@ -93,7 +93,6 @@ void TRIANGLE::delete_buffers() {
     glDeleteBuffers(1, &vao);
 }
 
-double TRIANGLE::get_delta_time() {
-    cout << glfwGetTime() - previous_time << endl;
-    return glfwGetTime() - previous_time;
+void TRIANGLE::set_delta_time(double new_delta_time) {
+    delta_time = new_delta_time;
 }
