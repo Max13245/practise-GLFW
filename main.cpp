@@ -8,6 +8,7 @@
 #include "utils/shaders.hpp"
 #include "triangle.hpp"
 #include "quad.hpp"
+#include "circle.hpp"
 
 #include <stdio.h>
 #include <iostream>
@@ -138,6 +139,7 @@ int main() {
 
     TRIANGLE random_triangle(points, colors);
     QUAD random_quad(quad_points, quad_colors);
+    CIRCLE random_circle(0.0f, 0.0f, 1.0f, 36);
     float speed = 1.0f; // Speed in f/s (distance / time)
 
     // Set a background color
@@ -151,6 +153,7 @@ int main() {
         double delta_time = glfwGetTime() - previous_time;
         random_triangle.set_delta_time(delta_time);
         random_quad.set_delta_time(delta_time);
+        random_circle.set_delta_time(delta_time);
         previous_time = glfwGetTime();
 
         // Update fps
@@ -160,7 +163,8 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         //random_triangle.draw();
-        random_quad.draw();
+        //random_quad.draw();
+        random_circle.draw();
 
         // Put the stuff we've been drawing onto the display
         glfwSwapBuffers(window);
@@ -174,18 +178,22 @@ int main() {
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_UP)) {
             random_triangle.move_up(speed);
             random_quad.move_up(speed);
+            random_circle.move_up(speed);
         } 
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT)) {
             random_triangle.move_right(speed);
             random_quad.move_right(speed);
+            random_circle.move_right(speed);
         } 
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN)) {
             random_triangle.move_down(speed);
             random_quad.move_down(speed);
+            random_circle.move_down(speed);
         } 
         if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT)) {
             random_triangle.move_left(speed);
             random_quad.move_left(speed);
+            random_circle.move_left(speed);
         }
     }
 
