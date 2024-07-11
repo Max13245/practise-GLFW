@@ -1,16 +1,13 @@
 #include <glad/glad.h> // Include before GLFW
 #include <GLFW/glfw3.h>
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "../glm/glm.hpp"
+#include "../glm/gtc/matrix_transform.hpp"
+#include "../glm/gtc/type_ptr.hpp"
 
-#include "utils/shaders.hpp"
+#include "../utils/shaders.hpp"
 #include "circle.hpp"
 
-#include <stdio.h>
-#include <iostream>
 #include <cmath>
-using namespace std;
 
 CIRCLE::CIRCLE(float x_center, float y_center, float radius, int n_sides) {
     n_elements = 3 * n_sides;

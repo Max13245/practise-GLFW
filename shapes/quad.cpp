@@ -1,15 +1,11 @@
 #include <glad/glad.h> // Include before GLFW
 #include <GLFW/glfw3.h>
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "../glm/glm.hpp"
+#include "../glm/gtc/matrix_transform.hpp"
+#include "../glm/gtc/type_ptr.hpp"
 
-#include "utils/shaders.hpp"
+#include "../utils/shaders.hpp"
 #include "quad.hpp"
-
-#include <stdio.h>
-#include <iostream>
-using namespace std;
 
 QUAD::QUAD(float vertices[12], float colors[12]) {
     // Vertices must be passed ass Top left, Top Right, Bottom Right, Bottom left
@@ -51,10 +47,6 @@ QUAD::QUAD(float vertices[12], float colors[12]) {
     glEnableVertexAttribArray(1);
 
     shader_programme = create_shaders_from_files("test_vs.glsl", "test_fs.glsl");
-
-    xOffset = 0.0f;
-    yOffset = 0.0f;
-    this->update_transform_matrix();
 };
 
 void QUAD::draw() {

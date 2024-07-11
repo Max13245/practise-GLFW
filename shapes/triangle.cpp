@@ -1,15 +1,11 @@
 #include <glad/glad.h> // Include before GLFW
 #include <GLFW/glfw3.h>
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "../glm/glm.hpp"
+#include "../glm/gtc/matrix_transform.hpp"
+#include "../glm/gtc/type_ptr.hpp"
 
-#include "utils/shaders.hpp"
+#include "../utils/shaders.hpp"
 #include "triangle.hpp"
-
-#include <stdio.h>
-#include <iostream>
-using namespace std;
 
 TRIANGLE::TRIANGLE(float vertices[9], float colors[9]) {
     // Store the points in a GLbuffer
@@ -37,10 +33,6 @@ TRIANGLE::TRIANGLE(float vertices[9], float colors[9]) {
     glEnableVertexAttribArray(1);
 
     shader_programme = create_shaders_from_files("test_vs.glsl", "test_fs.glsl");
-
-    xOffset = 0.0f;
-    yOffset = 0.0f;
-    this->update_transform_matrix();
 };
 
 void TRIANGLE::draw() {

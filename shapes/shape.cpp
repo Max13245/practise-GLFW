@@ -1,15 +1,10 @@
 #include <glad/glad.h> // Include before GLFW
 #include <GLFW/glfw3.h>
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "../glm/glm.hpp"
+#include "../glm/gtc/matrix_transform.hpp"
+#include "../glm/gtc/type_ptr.hpp"
 
-#include "utils/shaders.hpp"
 #include "shape.hpp"
-
-#include <stdio.h>
-#include <iostream>
-using namespace std;
 
 SHAPE::SHAPE() {
     xOffset = 0.0f;

@@ -5,10 +5,9 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "utils/log.hpp"
-#include "utils/shaders.hpp"
-#include "triangle.hpp"
-#include "quad.hpp"
-#include "circle.hpp"
+#include "shapes/triangle.hpp"
+#include "shapes/quad.hpp"
+#include "shapes/circle.hpp"
 
 #include <stdio.h>
 #include <iostream>
