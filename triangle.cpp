@@ -43,14 +43,6 @@ TRIANGLE::TRIANGLE(float vertices[9], float colors[9]) {
     this->update_transform_matrix();
 };
 
-GLuint TRIANGLE::get_vao() {
-    return vao;
-}
-
-GLuint TRIANGLE::get_shader_programme() {
-    return shader_programme;
-}
-
 void TRIANGLE::draw() {
     glUseProgram(shader_programme);
     glBindVertexArray(vao);
@@ -61,38 +53,8 @@ void TRIANGLE::draw() {
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 }
 
-void TRIANGLE::move_up(float delta_offset) {
-    yOffset += delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void TRIANGLE::move_right(float delta_offset) {
-    xOffset += delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void TRIANGLE::move_down(float delta_offset) {
-    yOffset -= delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void TRIANGLE::move_left(float delta_offset) {
-    xOffset -= delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void TRIANGLE::update_transform_matrix() {
-    // Update the transformation matrix
-    transform = glm::mat4(1.0f);
-    transform = glm::translate(transform, glm::vec3(xOffset, yOffset, 0.0f));
-}
-
 void TRIANGLE::delete_buffers() {
     glDeleteBuffers(1, &color_vbo);
     glDeleteBuffers(1, &points_vbo);
     glDeleteBuffers(1, &vao);
-}
-
-void TRIANGLE::set_delta_time(double new_delta_time) {
-    delta_time = new_delta_time;
 }

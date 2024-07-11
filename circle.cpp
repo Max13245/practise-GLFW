@@ -56,34 +56,22 @@ CIRCLE::CIRCLE(float x_center, float y_center, float radius, int n_sides) {
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-    glBufferData(GL_ARRAY_BUFFER, n_elements * sizeof(float), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, n_elements * sizeof(float), vertices, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
     
     glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
-    glBufferData(GL_ARRAY_BUFFER, n_elements * sizeof(float), colors, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, n_elements * sizeof(float), colors, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
     shader_programme = create_shaders_from_files("test_vs.glsl", "test_fs.glsl");
-
-    xOffset = 0.0f;
-    yOffset = 0.0f;
-    this->update_transform_matrix();
 };
-
-GLuint CIRCLE::get_vao() {
-    return vao;
-}
-
-GLuint CIRCLE::get_shader_programme() {
-    return shader_programme;
-}
 
 void CIRCLE::draw() {
     glUseProgram(shader_programme);
@@ -95,39 +83,9 @@ void CIRCLE::draw() {
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 }
 
-void CIRCLE::move_up(float delta_offset) {
-    yOffset += delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void CIRCLE::move_right(float delta_offset) {
-    xOffset += delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void CIRCLE::move_down(float delta_offset) {
-    yOffset -= delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void CIRCLE::move_left(float delta_offset) {
-    xOffset -= delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void CIRCLE::update_transform_matrix() {
-    // Update the transformation matrix
-    transform = glm::mat4(1.0f);
-    transform = glm::translate(transform, glm::vec3(xOffset, yOffset, 0.0f));
-}
-
 void CIRCLE::delete_buffers() {
     glDeleteBuffers(1, &color_vbo);
     glDeleteBuffers(1, &points_vbo);
     glDeleteBuffers(1, &ebo);
     glDeleteBuffers(1, &vao);
-}
-
-void CIRCLE::set_delta_time(double new_delta_time) {
-    delta_time = new_delta_time;
 }

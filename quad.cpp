@@ -57,14 +57,6 @@ QUAD::QUAD(float vertices[12], float colors[12]) {
     this->update_transform_matrix();
 };
 
-GLuint QUAD::get_vao() {
-    return vao;
-}
-
-GLuint QUAD::get_shader_programme() {
-    return shader_programme;
-}
-
 void QUAD::draw() {
     glUseProgram(shader_programme);
     glBindVertexArray(vao);
@@ -75,39 +67,9 @@ void QUAD::draw() {
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 }
 
-void QUAD::move_up(float delta_offset) {
-    yOffset += delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void QUAD::move_right(float delta_offset) {
-    xOffset += delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void QUAD::move_down(float delta_offset) {
-    yOffset -= delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void QUAD::move_left(float delta_offset) {
-    xOffset -= delta_offset * delta_time;
-    update_transform_matrix();
-}
-
-void QUAD::update_transform_matrix() {
-    // Update the transformation matrix
-    transform = glm::mat4(1.0f);
-    transform = glm::translate(transform, glm::vec3(xOffset, yOffset, 0.0f));
-}
-
 void QUAD::delete_buffers() {
     glDeleteBuffers(1, &color_vbo);
     glDeleteBuffers(1, &points_vbo);
     glDeleteBuffers(1, &ebo);
     glDeleteBuffers(1, &vao);
-}
-
-void QUAD::set_delta_time(double new_delta_time) {
-    delta_time = new_delta_time;
 }
