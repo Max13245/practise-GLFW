@@ -28,6 +28,29 @@ SPOLY::SPOLY(float vertices[], int n_poly_vertices) {
     };
 };
 
+float SPOLY::get_triangle_area(dlinked* first, dlinked* second, dlinked* third) {
+    // Derive vectors from the three vertices
+    float vector_1x = first->x - second->x; // -1
+    float vector_1y = first->y - second->y; // -1
+    float vector_2x =  third->x - second->x; // 1
+    float vector_2y = third->y - second->y; // -1
+    float cross_product = vector_1x * vector_2y - vector_2x * vector_1y;
+    return abs(cross_product) / 2;
+}
+
+bool SPOLY::point_in_triangle(dlinked* first, dlinked* second, dlinked* third, dlinked* point) {
+    float triangle_area = get_triangle_area(first, second, third);
+    float area_sum = 0.0;
+    area_sum += get_triangle_area(first, second, point);
+    area_sum += get_triangle_area(first, third, point);
+    area_sum += get_triangle_area(second, third, point);
+
+    if (triangle_area == area_sum) {
+        return true;
+    }
+    return false;
+}
+
 float SPOLY::get_angle(dlinked* first, dlinked* second, dlinked* third) {
     // Derive vectors from the three vertices
     float vector_1x = first->x - second->x;
