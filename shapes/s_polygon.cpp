@@ -28,6 +28,23 @@ SPOLY::SPOLY(float vertices[], int n_poly_vertices) {
     };
 };
 
+float SPOLY::get_angle(dlinked* first, dlinked* second, dlinked* third) {
+    // Derive vectors from the three vertices
+    float vector_1x = first->x - second->x;
+    float vector_1y = first->y - second->y;
+    float vector_2x =  third->x - second->x;
+    float vector_2y = third->y - second->y;
+
+    // Calculate the angle between the 2 vectors (in degrees)
+    float angle = acos(
+        (vector_1x * vector_2x + vector_1y * vector_2y) / 
+        (sqrt(pow(vector_1x, 2) + pow(vector_1y, 2)) * 
+        sqrt(pow(vector_2x, 2) + pow(vector_2y, 2)))) *
+        180 / M_PI;
+    cout << angle << endl;
+    return angle;
+}
+
 dlinked* SPOLY::array_to_dlinked(float vertices[]) {
     // Loop through all vertices in reverse so the previous pointer points to the node with the first vertex
     dlinked* previous = NULL;
