@@ -31,27 +31,20 @@ SPOLY::SPOLY(float vertices[], int n_poly_vertices) {
 
 bool SPOLY::is_ear(dlinked* poly_vertices, dlinked* triangle_node) {
     dlinked* current_node = poly_vertices;
-    for (;;) {
+    for (int i = 0; i < n_vertices; i++) {
         // Check if vertex is one of the triangle vertices
         if (current_node == triangle_node->parent_node ||
             current_node == triangle_node ||
             current_node == triangle_node->child_node
         ) {
-            if (!current_node->child_node) {
-                break;
-            }
             current_node = current_node->child_node;
             continue;
         }
 
-        // TODO: parent or child node could be null pointer
         if (point_in_triangle(triangle_node->parent_node, triangle_node, triangle_node->child_node, current_node)) {
             return false;
         }
 
-        if (!current_node->child_node) {
-            break;
-        }
         // Move to the next node
         current_node = current_node->child_node;
     }
@@ -99,20 +92,24 @@ float SPOLY::get_angle(dlinked* first, dlinked* second, dlinked* third) {
 }
 
 dlinked* SPOLY::array_to_dlinked(float vertices[]) {
-    // Loop through all vertices in reverse so the previous pointer points to the node with the first vertex
+    // Create a circular doubly linked list
+    dlinked* first = new dlinked;
+    dlinked* current_node = first;
     dlinked* previous = NULL;
-    for (int i = n_vertices - 1; i >= 0; i--) {
-        dlinked *current_node = new dlinked;
+    for (int i = 0; i < n_vertices; i++) {
         current_node->x = vertices[3 * i];
         current_node->y = vertices[3 * i + 1];
         current_node->z = vertices[3 * i + 2];
-        current_node->child_node = previous;
-        if (previous) {
-            previous->parent_node = current_node;
-        }
+
+        current_node->parent_node = previous;
+        current_node->child_node = new dlinked;
         previous = current_node;
+        current_node = current_node->child_node;
     }
-    return previous;
+    previous->child_node = first;
+    first->parent_node = previous;
+
+    return first;
 }
 
 void SPOLY::draw() {
