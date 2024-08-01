@@ -6,6 +6,7 @@
 
 #include "../utils/shaders.hpp"
 #include "../utils/dlinked_list.hpp"
+#include "../utils/linked_list.hpp"
 #include "s_polygon.hpp"
 
 #include <cmath>
@@ -28,12 +29,41 @@ SPOLY::SPOLY(float vertices[], int n_poly_vertices) {
     };
 };
 
+bool SPOLY::is_ear(dlinked* poly_vertices, dlinked* triangle_node) {
+    dlinked* current_node = poly_vertices;
+    for (;;) {
+        // Check if vertex is one of the triangle vertices
+        if (current_node == triangle_node->parent_node ||
+            current_node == triangle_node ||
+            current_node == triangle_node->child_node
+        ) {
+            if (!current_node->child_node) {
+                break;
+            }
+            current_node = current_node->child_node;
+            continue;
+        }
+
+        // TODO: parent or child node could be null pointer
+        if (point_in_triangle(triangle_node->parent_node, triangle_node, triangle_node->child_node, current_node)) {
+            return false;
+        }
+
+        if (!current_node->child_node) {
+            break;
+        }
+        // Move to the next node
+        current_node = current_node->child_node;
+    }
+    return true;
+}
+
 float SPOLY::get_triangle_area(dlinked* first, dlinked* second, dlinked* third) {
     // Derive vectors from the three vertices
-    float vector_1x = first->x - second->x; // -1
-    float vector_1y = first->y - second->y; // -1
-    float vector_2x =  third->x - second->x; // 1
-    float vector_2y = third->y - second->y; // -1
+    float vector_1x = first->x - second->x;
+    float vector_1y = first->y - second->y;
+    float vector_2x =  third->x - second->x;
+    float vector_2y = third->y - second->y;
     float cross_product = vector_1x * vector_2y - vector_2x * vector_1y;
     return abs(cross_product) / 2;
 }
