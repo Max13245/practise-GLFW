@@ -51,44 +51,49 @@ bool SPOLY::is_ear(dlinked* poly_vertices, dlinked* triangle_node) {
     return true;
 }
 
-float SPOLY::get_triangle_area(dlinked* first, dlinked* second, dlinked* third) {
-    // Derive vectors from the three vertices
-    float vector_1x = first->x - second->x;
-    float vector_1y = first->y - second->y;
-    float vector_2x =  third->x - second->x;
-    float vector_2y = third->y - second->y;
-    float cross_product = vector_1x * vector_2y - vector_2x * vector_1y;
-    return abs(cross_product) / 2;
-}
+bool SPOLY::is_convex(dlinked* A, dlinked* B, dlinked* C) {
+    // TODO: Probably make this more efficient
+    // Derive vector AB
+    float vector_AB_x = A->x - B->x;
+    float vector_AB_y = A->y - B->y;
 
-bool SPOLY::point_in_triangle(dlinked* first, dlinked* second, dlinked* third, dlinked* point) {
-    float triangle_area = get_triangle_area(first, second, third);
-    float area_sum = 0.0;
-    area_sum += get_triangle_area(first, second, point);
-    area_sum += get_triangle_area(first, third, point);
-    area_sum += get_triangle_area(second, third, point);
+    float slope_AB = vector_AB_y / vector_AB_x;
+    float y_intercept_AB = A->y - (slope_AB * A->x);
+    
+    float slope_SC = -1.0 / slope_AB; 
+    float y_intercept_SC = C->y - (slope_SC * C->x);
 
-    if (triangle_area == area_sum) {
+    float S_x = (y_intercept_SC - y_intercept_AB) / (slope_AB - slope_SC);
+    float vector_SC_x = S_x - C->x;
+
+    // Check if the vector AB can be turned right so it forms SC
+    if ((-vector_AB_x < 0 && vector_SC_x > 0) || (-vector_AB_x > 0 && vector_SC_x < 0)) {
         return true;
     }
     return false;
 }
 
-float SPOLY::get_angle(dlinked* first, dlinked* second, dlinked* third) {
+float SPOLY::get_triangle_area(dlinked* A, dlinked* B, dlinked* C) {
     // Derive vectors from the three vertices
-    float vector_1x = first->x - second->x;
-    float vector_1y = first->y - second->y;
-    float vector_2x =  third->x - second->x;
-    float vector_2y = third->y - second->y;
+    float vector_AB_x = A->x - B->x;
+    float vector_AB_y = A->y - B->y;
+    float vector_BC_x =  C->x - B->x;
+    float vector_BC_y = C->y - B->y;
+    float cross_product = vector_AB_x * vector_BC_y - vector_BC_x * vector_AB_y;
+    return abs(cross_product) / 2;
+}
 
-    // Calculate the angle between the 2 vectors (in degrees)
-    float angle = acos(
-        (vector_1x * vector_2x + vector_1y * vector_2y) / 
-        (sqrt(pow(vector_1x, 2) + pow(vector_1y, 2)) * 
-        sqrt(pow(vector_2x, 2) + pow(vector_2y, 2)))) *
-        180 / M_PI;
-    cout << angle << endl;
-    return angle;
+bool SPOLY::point_in_triangle(dlinked* A, dlinked* B, dlinked* C, dlinked* P) {
+    float triangle_area = get_triangle_area(A, B, C);
+    float area_sum = 0.0;
+    area_sum += get_triangle_area(A, B, P);
+    area_sum += get_triangle_area(A, C, P);
+    area_sum += get_triangle_area(B, C, P);
+
+    if (triangle_area == area_sum) {
+        return true;
+    }
+    return false;
 }
 
 dlinked* SPOLY::array_to_dlinked(float vertices[]) {

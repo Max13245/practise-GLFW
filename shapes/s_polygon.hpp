@@ -24,7 +24,7 @@ class SPOLY: public SHAPE {
         GLuint shader_programme;
         unsigned int n_elements;
         bool is_ear(dlinked* poly_vertices, dlinked* triangle_node);
-        float get_angle(dlinked* first, dlinked* second, dlinked* third);
+        bool is_convex(dlinked* A, dlinked* B, dlinked* C);
         bool point_in_triangle(dlinked* first, dlinked* second, dlinked* third, dlinked* point);
         float get_triangle_area(dlinked* first, dlinked* second, dlinked* third);
 };
