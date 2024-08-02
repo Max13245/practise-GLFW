@@ -52,22 +52,15 @@ bool SPOLY::is_ear(dlinked* poly_vertices, dlinked* triangle_node) {
 }
 
 bool SPOLY::is_convex(dlinked* A, dlinked* B, dlinked* C) {
-    // TODO: Probably make this more efficient
-    // Derive vector AB
+    // Derive vector AB and AC
     float vector_AB_x = A->x - B->x;
     float vector_AB_y = A->y - B->y;
+    float vector_AC_x = A->x - C->x;
+    float vector_AC_y = A->y - C->y;
 
-    float slope_AB = vector_AB_y / vector_AB_x;
-    float y_intercept_AB = A->y - (slope_AB * A->x);
-    
-    float slope_SC = -1.0 / slope_AB; 
-    float y_intercept_SC = C->y - (slope_SC * C->x);
-
-    float S_x = (y_intercept_SC - y_intercept_AB) / (slope_AB - slope_SC);
-    float vector_SC_x = S_x - C->x;
-
-    // Check if the vector AB can be turned right so it forms SC
-    if ((-vector_AB_x < 0 && vector_SC_x > 0) || (-vector_AB_x > 0 && vector_SC_x < 0)) {
+    float radian_angle = asin((vector_AB_x * (vector_AC_y - vector_AB_y) - vector_AC_x) / (pow(vector_AB_x, 2) + pow(vector_AB_y, 2)));
+    cout << radian_angle << endl;
+    if (radian_angle > 0) {
         return true;
     }
     return false;
