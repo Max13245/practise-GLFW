@@ -58,12 +58,11 @@ bool SPOLY::is_convex(dlinked* A, dlinked* B, dlinked* C) {
     float vector_AC_x = A->x - C->x;
     float vector_AC_y = A->y - C->y;
 
-    float radian_angle = asin((vector_AB_x * (vector_AC_y - vector_AB_y) - vector_AC_x) / (pow(vector_AB_x, 2) + pow(vector_AB_y, 2)));
-    cout << radian_angle << endl;
-    if (radian_angle > 0) {
-        return true;
+    float cross_product = vector_AB_x * vector_AC_y - vector_AC_x * vector_AB_y;
+    if (cross_product >= 0) {
+        return false;
     }
-    return false;
+    return true;
 }
 
 float SPOLY::get_triangle_area(dlinked* A, dlinked* B, dlinked* C) {
