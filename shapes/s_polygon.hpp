@@ -7,6 +7,8 @@
 
 #include "shape.hpp"
 #include "../utils/dlinked_list.hpp"
+#include "../utils/linked_list.hpp"
+
 
 class SPOLY: public SHAPE {
     public:
@@ -25,6 +27,7 @@ class SPOLY: public SHAPE {
         unsigned int n_elements;
         bool is_ear(dlinked* poly_vertices, dlinked* triangle_node);
         bool is_convex(dlinked* A, dlinked* B, dlinked* C);
+        void print_linked(linked* node);
         bool point_in_triangle(dlinked* first, dlinked* second, dlinked* third, dlinked* point);
         float get_triangle_area(dlinked* first, dlinked* second, dlinked* third);
 };

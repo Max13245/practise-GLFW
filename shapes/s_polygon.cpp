@@ -15,19 +15,54 @@ using namespace std;
 
 SPOLY::SPOLY(float vertices[], int n_poly_vertices) {
     n_vertices = n_poly_vertices;
+
+    // Use copies for linked creation, so the root pointers are still available
+    linked *current_convex = new linked;
+    linked *current_reflex = new linked;
+    linked *current_ear = new linked;
+    linked *convex = current_convex;
+    linked *reflex = current_reflex;
+    linked *ear = current_ear;
     dlinked* poly_vertices = array_to_dlinked(vertices);
 
-    cout << ":::::::::::" << endl;
     dlinked* current_node = poly_vertices;
-    while (true) {
-        cout << current_node->x << endl;
-        if (current_node->child_node) {
-            current_node = current_node->child_node;
+    for (int i = 0; i < n_vertices; i++) {
+        if (is_convex(current_node->parent_node, current_node, current_node->child_node)) {
+            // Add to convex
+            current_convex->node_data = current_node;
+            current_convex->child_node = new linked;
+            current_convex = current_convex->child_node;
+
+            if (is_ear(poly_vertices, current_node)) {
+                // Add to ears
+                current_ear->node_data = current_node;
+                current_ear->child_node = new linked;
+                current_ear = current_ear->child_node;
+            }
         } else {
-            break;
-        }
+            // Add to reflex
+            current_reflex->node_data = current_node;
+            current_reflex->child_node = new linked;
+            current_reflex = current_reflex->child_node;
+        } 
+
+        current_node = current_node->child_node;
     };
+
+    print_linked(convex);
+    cout << "-----------------" << endl;
+    print_linked(reflex);
+    cout << "-----------------" << endl;
+    print_linked(ear);
 };
+
+void SPOLY::print_linked(linked* node) {
+    cout << node->node_data->x << endl;
+    cout << node->node_data->y << endl;
+    if (node->child_node->node_data) {
+        print_linked(node->child_node);
+    }
+}
 
 bool SPOLY::is_ear(dlinked* poly_vertices, dlinked* triangle_node) {
     dlinked* current_node = poly_vertices;
